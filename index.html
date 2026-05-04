@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seaporia.id | Official Trip Management</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; background: #fcfdfe; }
+        .active-tab { background: #2563eb; color: white; }
+        .bento-item { transition: all 0.5s ease; border-radius: 2rem; overflow: hidden; }
+        .floating-wa { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { transform: scale(1.05); shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { transform: scale(1); shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+    </style>
+</head>
+<body x-data="seaporiaApp()" x-init="initData()">
+
+    <a href="https://wa.me/6285770799461" target="_blank" class="fixed bottom-8 right-8 z-[100] bg-green-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-2xl floating-wa hover:bg-green-600 transition">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" @click="window.scrollTo(0,0)">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg"><i class=></i></div>
+                <span class="text-xl font-extrabold tracking-tighter uppercase">SEAPORIA<span class="text-blue-600">.ID</span></span>
+            </div>
+            <div class="hidden md:flex gap-6 items-center">
+                <a href="https://instagram.com/seaporia.id" target="_blank" class="text-slate-400 hover:text-pink-600 transition text-xl"><i class="fab fa-instagram"></i></a>
+                <a href="https://tiktok.com/@seaporia.id" target="_blank" class="text-slate-400 hover:text-black transition text-xl"><i class="fab fa-tiktok"></i></a>
+                <a href="#booking" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold text-sm shadow-md">Booking</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="pt-40 pb-20 px-6 container mx-auto max-w-6xl text-center">
+        <span class="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">Premium Tour Organizer</span>
+        <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 mt-6 mb-8 leading-tight">Jelajahi Surga di <br><span class="text-blue-600">Pulau Tidung</span></h1>
+        <div class="flex justify-center gap-4">
+            <a href="#booking" class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-xl hover:bg-blue-600 transition">Mulai Booking</a>
+            <a href="https://instagram.com/seaporia.id" target="_blank" class="px-8 py-4 bg-white border border-slate-200 rounded-2xl font-bold flex items-center gap-2 hover:bg-slate-50 transition">
+                <i class="fab fa-instagram text-pink-500"></i> Lihat Galeri IG
+            </a>
+        </div>
+    </header>
+<div x-data="seaporiaChat()" class="max-w-xl mx-auto px-6 py-12">
+    
+    <div class="flex items-center gap-4 mb-8">
+        <div class="relative">
+            <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+        </div>
+        <div>
+            <h2 class="text-xl font-bold">Seaporia Assistant</h2>
+            <p class="text-xs text-green-500 font-bold uppercase tracking-widest">Online | AI Powered</p>
+        </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-[32px] border border-gray-100 flex flex-col h-[500px] overflow-hidden shadow-inner">
+        
+        <div class="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar" id="chat-box">
+            <template x-for="msg in messages">
+                <div :class="msg.role === 'user' ? 'justify-end' : 'justify-start'" class="flex">
+                    <div :class="msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'" 
+                         class="max-w-[80%] p-4 rounded-2xl text-sm shadow-sm">
+                        
+                        <div x-show="msg.typing" class="flex gap-1 py-1">
+                            <span class="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce"></span>
+                            <span class="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                            <span class="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                        </div>
+                        
+                        <span x-show="!msg.typing" x-html="msg.text"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="p-4 bg-white border-t border-gray-100">
+            <form @submit.prevent="sendMessage()" class="relative flex items-center">
+                <input type="text" x-model="userInput" 
+                       placeholder="Ketik: 'buatkan rencana 2 hari' atau 'info harga'..." 
+                       class="w-full bg-gray-50 border-none p-4 pr-16 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+                <button type="submit" class="absolute right-2 w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-slate-900 transition-all">
+                    <i class="fas fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+        <button @click="quickAsk('Rekomendasi trip 2 hari')" class="text-[10px] font-bold border border-gray-200 px-3 py-1.5 rounded-full text-gray-400 hover:border-blue-500 hover:text-blue-500 transition">Trip 2 Hari</button>
+        <button @click="quickAsk('Berapa harga paketnya?')" class="text-[10px] font-bold border border-gray-200 px-3 py-1.5 rounded-full text-gray-400 hover:border-blue-500 hover:text-blue-500 transition">Cek Harga</button>
+        <button @click="quickAsk('Fasilitasnya apa saja?')" class="text-[10px] font-bold border border-gray-200 px-3 py-1.5 rounded-full text-gray-400 hover:border-blue-500 hover:text-blue-500 transition">Fasilitas</button>
+    </div>
+</div>
+
+<script>
+function seaporiaChat() {
+    return {
+        userInput: '',
+        messages: [
+            { role: 'bot', text: 'Halo! Saya AI Seaporia. Mau dibuatkan rencana liburan ke Pulau Tidung? Ketik saja keinginanmu!', typing: false }
+        ],
+
+        quickAsk(txt) {
+            this.userInput = txt;
+            this.sendMessage();
+        },
+
+        sendMessage() {
+            if (!this.userInput.trim()) return;
+
+            // Add User Message
+            this.messages.push({ role: 'user', text: this.userInput, typing: false });
+            const query = this.userInput.toLowerCase();
+            this.userInput = '';
+
+            // Scroll to bottom
+            this.scrollToBottom();
+
+            // Add Bot Typing Placeholder
+            const botMsgIndex = this.messages.length;
+            this.messages.push({ role: 'bot', text: '', typing: true });
+
+            // Simulate "Thinking"
+            setTimeout(() => {
+                this.messages[botMsgIndex].typing = false;
+                this.messages[botMsgIndex].text = this.getBotResponse(query);
+                this.scrollToBottom();
+            }, 1500);
+        },
+
+        getBotResponse(q) {
+            if (q.includes('2 hari') || q.includes('2d1n')) {
+                return "<b>Rencana Trip 2D1N:</b><br>• Hari 1: Tiba, Snorkeling di Jembatan Cinta, Sunset di Pantai Saung.<br>• Hari 2: Sunrise, Water Sport, dan Belanja Oleh-oleh.<br><br>Mau pesan paket ini?";
+            }
+            if (q.includes('3 hari') || q.includes('3d2n')) {
+                return "<b>Rencana Trip 3D2N:</b><br>• Hari 1: Eksplorasi Hutan Mangrove.<br>• Hari 2: Snorkeling 3 Titik (Pulau Payung & Tidung Kecil).<br>• Hari 3: Santai di Pantai & Kepulangan.<br><br>Cocok untuk yang ingin santai!";
+            }
+            if (q.includes('harga') || q.includes('biaya')) {
+                return "Harga mulai dari <b>Rp 400.000/pax</b> untuk paket hemat. Anda ingin untuk berapa orang?";
+            }
+            if (q.includes('fasilitas') || q.includes('dapat apa')) {
+                return "Fasilitas kami meliputi: Kapal PP, Homestay AC, Makan 3x, Alat Snorkeling Lengkap, Kapal Snorkeling, dan Dokumentasi Underwater.";
+            }
+            if (q.includes('halo') || q.includes('hi') || q.includes('p')) {
+                return "Halo! Ada yang bisa saya bantu untuk rencana liburan Anda ke Pulau Tidung?";
+            }
+            return "Maaf, saya belum mengerti maksudnya. Tapi saya bisa membantu info <b>Harga</b>, <b>Fasilitas</b>, atau membuatkan <b>Itinerary 2 & 3 hari</b>.";
+        },
+
+        scrollToBottom() {
+            setTimeout(() => {
+                const box = document.getElementById('chat-box');
+                box.scrollTop = box.scrollHeight;
+            }, 50);
+        }
+    }
+}
+</script>
+</script>
+    <section id="paket" class="py-24 bg-white">
+        <div class="container mx-auto px-6 max-w-6xl text-center">
+            <h2 class="text-3xl font-extrabold mb-12">Paket Wisata Terpopuler</h2>
+            <div class="flex justify-center gap-2 p-1.5 bg-slate-100 rounded-2xl w-fit mx-auto mb-16">
+                <button @click="tab = '2d1n'" :class="tab === '2d1n' ? 'active-tab' : 'text-slate-500'" class="px-8 py-3 rounded-xl text-sm font-bold transition">Paket 2D1N</button>
+                <button @click="tab = '3d2n'" :class="tab === '3d2n' ? 'active-tab' : 'text-slate-500'" class="px-8 py-3 rounded-xl text-sm font-bold transition">Paket 3D2N</button>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <template x-for="p in pricing[tab]" :key="p.name">
+                    <div class="bg-white border border-slate-100 p-10 rounded-[40px] text-left hover:shadow-2xl transition group">
+                        <p class="text-xs font-bold text-blue-600 uppercase mb-6" x-text="p.name"></p>
+                        <div class="text-5xl font-extrabold mb-8" x-text="'Rp' + (p.price/1000) + 'k'"></div>
+                        <ul class="space-y-4 mb-10 text-sm font-medium text-slate-500">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Kapal PP Kali Adem</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Homestay Full AC</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Snorkeling & Foto Underwater</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Makan & BBQ Malam</li>
+                        </ul>
+                        <button @click="autoFill(p.price)" class="w-full py-4 bg-slate-100 group-hover:bg-blue-600 group-hover:text-white rounded-2xl font-bold transition">Booking Sekarang</button>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </section>
+
+<div id="booking" style="max-width: 1100px; margin: 50px auto; padding: 20px;">
+    <div style="background: #0a0a0b; color: white; border-radius: 32px; padding: 60px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+        
+        <div class="booking-info">
+            <h2 style="font-size: 3rem; font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 20px;">Siap Untuk Berangkat?</h2>
+            <p style="color: #a1a1a6; font-size: 1.1rem; margin-bottom: 40px;">Sistem akan menghitung harga otomatis secara transparan dan memberikan Invoice PDF resmi untuk Anda.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="background: #1c1c1e; padding: 12px; border-radius: 12px;"><i class="fas fa-file-invoice-dollar" style="color: #007AFF;"></i></div>
+                    <span style="font-size: 0.9rem; color: #e5e5e7;">Harga otomatis (Semakin banyak orang, semakin murah)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="background: #1c1c1e; padding: 12px; border-radius: 12px;"><i class="fab fa-whatsapp" style="color: #25D366;"></i></div>
+                    <span style="font-size: 0.9rem; color: #e5e5e7;">Admin 1: 085770799461 (Fast Response)</span>
+                </div>
+            </div>
+        </div>
+
+        <form id="bookingForm" onsubmit="return false;">
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 11px; font-weight: 700; color: #a1a1a6; text-transform: uppercase; display: block; margin-bottom: 8px;">Nama Lengkap</label>
+                <input type="text" id="cust_name" placeholder="E.g. Budi Raharjo" style="width: 100%; background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 14px; padding: 16px; color: white; font-size: 1rem; outline: none;" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #a1a1a6; text-transform: uppercase; display: block; margin-bottom: 8px;">Paket Wisata</label>
+                    <select id="cust_package" style="width: 100%; background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 14px; padding: 16px; color: white; font-size: 1rem; outline: none; cursor: pointer;">
+                        <option value="2D1N">2 Hari 1 Malam (2D1N)</option>
+                        <option value="3D2N">3 Hari 2 Malam (3D2N)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #a1a1a6; text-transform: uppercase; display: block; margin-bottom: 8px;">Jumlah Orang</label>
+                    <input type="number" id="cust_pax" value="2" min="2" style="width: 100%; background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 14px; padding: 16px; color: white; font-size: 1rem; outline: none;" required>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <label style="font-size: 11px; font-weight: 700; color: #a1a1a6; text-transform: uppercase; display: block; margin-bottom: 8px;">Tanggal Keberangkatan</label>
+                <input type="date" id="cust_date" style="width: 100%; background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 14px; padding: 16px; color: white; font-size: 1rem; outline: none;" required>
+            </div>
+
+            <button onclick="submitOrder()" style="background: #007AFF; color: white; border: none; padding: 20px; border-radius: 100px; width: 100%; font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.3s;">
+                Submit Booking & Get Invoice <i class="fas fa-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+<script>
+    function submitOrder() {
+        const name = document.getElementById('cust_name').value;
+        const pax = parseInt(document.getElementById('cust_pax').value);
+        const packageType = document.getElementById('cust_package').value;
+        const travelDate = document.getElementById('cust_date').value;
+
+        if(!name || !travelDate || !pax) {
+            alert("Harap lengkapi semua data!");
+            return;
+        }
+
+        // --- Logika Harga Berdasarkan Dokumen Itinerary ---
+        let pricePerPerson = 0;
+        if (packageType === "2D1N") {
+            if (pax >= 15) pricePerPerson = 400000;
+            else if (pax >= 10) pricePerPerson = 450000;
+            else if (pax >= 6) pricePerPerson = 525000;
+            else pricePerPerson = 750000;
+        } else { // 3D2N
+            if (pax >= 15) pricePerPerson = 650000;
+            else if (pax >= 10) pricePerPerson = 725000;
+            else if (pax >= 6) pricePerPerson = 850000;
+            else pricePerPerson = 1100000;
+        }
+
+        const total = pax * pricePerPerson;
+
+        // --- 1. Generate PDF ---
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFontSize(22);
+        doc.setTextColor(0, 122, 255); // Biru Premium
+        doc.text("INVOICE SEAPORIA.ID", 105, 25, { align: 'center' });
+        
+        doc.setLineWidth(0.5);
+        doc.line(20, 35, 190, 35);
+
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Nama Pelanggan : ${name}`, 20, 50);
+        doc.text(`Paket Wisata    : ${packageType}`, 20, 60);
+        doc.text(`Tanggal Trip    : ${travelDate}`, 20, 70);
+        doc.text(`Jumlah Peserta  : ${pax} Orang`, 20, 80);
+        doc.text(`Harga Per Pax   : Rp ${pricePerPerson.toLocaleString('id-ID')}`, 20, 90);
+        
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`TOTAL TAGIHAN  : Rp ${total.toLocaleString('id-ID')}`, 20, 110);
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(150, 150, 150);
+        doc.text("*Note: Silahkan kirim file ini ke Admin via WhatsApp.", 20, 130);
+        
+        doc.save(`Seaporia_Invoice_${name.replace(/\s+/g, '_')}.pdf`);
+
+        // --- 2. WhatsApp Connect ---
+        const msg = `Halo Seaporia.id! 👋%0A%0ASaya *${name}* ingin booking paket *${packageType}* untuk *${pax}* orang.%0A📅 Tanggal: *${travelDate}*%0A💰 Estimasi Total: *Rp ${total.toLocaleString('id-ID')}*%0A%0A(Invoice PDF telah di-generate secara otomatis). Mohon panduan untuk DP-nya!`;
+        
+        window.open(`https://wa.me/6285770799461?text=${msg}`, '_blank');
+    }
+</script>
+<script>
+    function aiItinerary() {
+        return {
+            days: 2,
+            style: 'adventure',
+            loading: false,
+            result: null,
+
+            generateAI() {
+                this.loading = true;
+                this.result = null;
+
+                // Simulasi delay "berpikir" agar terasa seperti AI asli
+                setTimeout(() => {
+                    this.result = this.getDatabase()[this.days][this.style];
+                    this.loading = false;
+                }, 1500);
+            },
+
+            getDatabase() {
+                return {
+                    2: {
+                        adventure: [
+                            [{time: '10:00', activity: 'Tiba di Dermaga Pulau Tidung & Check-in'}, {time: '14:00', activity: 'Snorkeling di Pulau Payung & Area Jembatan Cinta'}, {time: '17:30', activity: 'Sunset Hunting di Pantai Saung Perawan'}],
+                            [{time: '05:30', activity: 'Sunrise di Jembatan Cinta'}, {time: '09:00', activity: 'Water Sport (Banana Boat)'}, {time: '13:00', activity: 'Persiapan Pulang'}]
+                        ],
+                        chill: [
+                            [{time: '10:30', activity: 'Welcome Drink & Istirahat di Villa'}, {time: '16:00', activity: 'Bersepeda santai keliling pulau'}, {time: '19:00', activity: 'BBQ Seafood di Pinggir Pantai'}],
+                            [{time: '08:00', activity: 'Sarapan Lokal'}, {time: '10:00', activity: 'Foto di Jembatan Cinta tanpa antri'}, {time: '14:00', activity: 'Check-out'}]
+                        ],
+                        romantic: [
+                            [{time: '11:00', activity: 'Private Lunch'}, {time: '16:30', activity: 'Canoeing berdua saat Sunset'}, {time: '20:00', activity: 'Candle Light BBQ Dinner'}],
+                            [{time: '09:00', activity: 'Jalan santai ke Gembok Cinta'}, {time: '11:00', activity: 'Beli Oleh-oleh'}, {time: '13:00', activity: 'Kapal Kepulangan'}]
+                        ]
+                    },
+                    3: {
+                        adventure: [
+                            [{time: '10:00', activity: 'Tiba & Explorasi Hutan Mangrove'}, {time: '15:00', activity: 'Banana Boat Session'}, {time: '19:00', activity: 'Briefing Snorkeling'}],
+                            [{time: '08:00', activity: 'Full Day Snorkeling 3 Titik (Payung, Tidung Kecil, Karang Beras)'}, {time: '16:00', activity: 'Lompat dari Jembatan Cinta'}],
+                            [{time: '07:00', activity: 'Hunting Sarapan Lokal'}, {time: '10:00', activity: 'Check-out & Menuju Dermaga'}]
+                        ],
+                        chill: [
+                            [{time: '10:00', activity: 'Tiba & Santai di Pantai'}, {time: '15:00', activity: 'Pijat Tradisional/Relaksasi'}, {time: '19:00', activity: 'Makan Malam'}],
+                            [{time: '09:00', activity: 'Eksplorasi Pulau Tidung Kecil (Konservasi Penyu)'}, {time: '16:00', activity: 'Ngeteh santai di pinggir pantai'}],
+                            [{time: '08:00', activity: 'Sarapan & Packing'}, {time: '12:00', activity: 'Kepulangan'}]
+                        ],
+                        romantic: [
+                            [{time: '10:00', activity: 'VIP Pickup & Check-in Villa'}, {time: '17:00', activity: 'Sunset Cruise (Sewa Perahu Privat)'}],
+                            [{time: '09:00', activity: 'Island Hopping & Private Picnic di Pulau Tak Berpenghuni'}, {time: '19:00', activity: 'BBQ Dinner Eksklusif'}],
+                            [{time: '08:00', activity: 'Sunrise Coffee'}, {time: '13:00', activity: 'Check-out'}]
+                        ]
+                    }
+                }
+            }
+        }
+    }
+</script>
+    <section id="galeri" class="py-24 bg-white px-6">
+        <div class="container mx-auto max-w-6xl text-center">
+            <h2 class="text-3xl font-extrabold mb-4">Galeri Dokumentasi</h2>
+            <p class="text-slate-500 mb-12 italic">Lihat keseruan tamu kami atau unggah foto Anda sendiri.</p>
+            
+            <label class="cursor-pointer px-8 py-4 bg-slate-100 border-2 border-dashed border-slate-300 rounded-3xl font-bold flex items-center justify-center gap-3 mb-16 hover:bg-slate-50 transition">
+                <i class="fas fa-cloud-upload-alt text-blue-600"></i> TAMBAH FOTO LIBURAN
+                <input type="file" class="hidden" accept="image/*" @change="uploadImg($event)">
+            </label>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" x-cloak>
+                <template x-for="(img, i) in gallery" :key="i">
+                    <div class="bento-item shadow-lg relative group">
+                        <img :src="img" class="w-full h-full object-cover">
+                        <button @click="delImg(i)" class="absolute top-2 right-2 bg-white/20 backdrop-blur-md text-white w-10 h-10 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-red-500"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </section>
+<div x-data="testimoniApp()" x-init="init()" class="max-w-xl mx-auto px-6 py-10 bg-white">
+    
+    <div class="mb-10 text-center md:text-left">
+        <h2 class="text-3xl font-bold tracking-tight text-gray-900">Ulasan Tamu</h2>
+        <p class="text-gray-400 mt-2 text-sm">Apa kata mereka yang sudah menjelajahi Pulau Tidung bersama kami.</p>
+    </div>
+
+    <div class="bg-gray-50 border border-gray-100 p-8 rounded-[32px] mb-12">
+        <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">Tulis Pengalaman Anda</h3>
+        
+        <div class="space-y-4">
+            <input type="text" x-model="newTesti.nama" placeholder="Nama Anda" 
+                class="w-full bg-white border border-transparent focus:border-blue-500 p-4 rounded-2xl outline-none text-sm transition-all shadow-sm">
+            
+            <textarea x-model="newTesti.pesan" placeholder="Ceritakan keseruan trip Anda..." 
+                class="w-full bg-white border border-transparent focus:border-blue-500 p-4 rounded-2xl outline-none text-sm transition-all shadow-sm h-28"></textarea>
+            
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex gap-2">
+                    <template x-for="i in 5">
+                        <i class="fas fa-star cursor-pointer text-xl transition-colors" 
+                           :class="i <= newTesti.rating ? 'text-yellow-400' : 'text-gray-200'"
+                           @click="newTesti.rating = i"></i>
+                    </template>
+                </div>
+                
+                <button @click="addTesti()" 
+                    class="w-full sm:w-auto bg-blue-600 text-white px-10 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95">
+                    Kirim Ulasan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <template x-for="(t, i) in testimonials" :key="i">
+            <div class="p-8 border border-gray-50 rounded-[32px] bg-white shadow-sm hover:shadow-md transition-shadow relative group">
+                <div class="flex gap-1 mb-4">
+                    <template x-for="s in 5">
+                        <i class="fas fa-star text-[10px]" :class="s <= t.rating ? 'text-yellow-400' : 'text-gray-100'"></i>
+                    </template>
+                </div>
+                
+                <p class="text-gray-600 leading-relaxed italic mb-6 text-sm" x-text="'&ldquo;' + t.pesan + '&rdquo;'"></p>
+                
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold" x-text="t.nama.charAt(0)"></div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900" x-text="t.nama"></p>
+                            <p class="text-[10px] text-gray-300 font-medium" x-text="t.tanggal"></p>
+                        </div>
+                    </div>
+                    
+                    <button @click="deleteTesti(i)" class="text-gray-200 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                        <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </template>
+
+        <div x-show="testimonials.length === 0" class="text-center py-10">
+            <p class="text-gray-300 text-sm italic">Belum ada ulasan saat ini.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function testimoniApp() {
+        return {
+            testimonials: [],
+            newTesti: { nama: '', pesan: '', rating: 5 },
+
+            init() {
+                const saved = localStorage.getItem('seaporia_clean_testi');
+                this.testimonials = saved ? JSON.parse(saved) : [
+                    { nama: "Rizky", pesan: "Trip paling mantap! Guide-nya asik banget pas snorkeling.", rating: 5, tanggal: "1 Mei 2026" }
+                ];
+            },
+
+            addTesti() {
+                if(!this.newTesti.nama || !this.newTesti.pesan) {
+                    alert("Isi nama dan kesan Anda terlebih dahulu ya.");
+                    return;
+                }
+                
+                const payload = {
+                    ...this.newTesti,
+                    tanggal: new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' })
+                };
+
+                this.testimonials.unshift(payload);
+                this.save();
+                this.newTesti = { nama: '', pesan: '', rating: 5 };
+            },
+
+            deleteTesti(i) {
+                if(confirm('Hapus ulasan ini secara permanen?')) {
+                    this.testimonials.splice(i, 1);
+                    this.save();
+                }
+            },
+
+            save() {
+                localStorage.setItem('seaporia_clean_testi', JSON.stringify(this.testimonials));
+            }
+        }
+    }
+</script>
+    <footer class="bg-slate-50 py-20 px-6 border-t border-slate-100">
+        <div class="container mx-auto max-w-6xl grid md:grid-cols-3 gap-16 text-center md:text-left">
+            <div>
+                <div class="text-xl font-extrabold mb-6">SEAPORIA<span class="text-blue-600">.ID</span></div>
+                <p class="text-slate-400 text-sm leading-relaxed font-medium">Layanan tour professional ke Pulau Tidung. Menjadikan setiap perjalanan Anda momen yang tak terlupakan dengan fasilitas VIP.</p>
+            </div>
+            <div>
+                <h4 class="font-extrabold text-sm uppercase tracking-widest mb-6">Hubungi Kami</h4>
+                <div class="space-y-4 font-bold text-slate-600">
+                    <a href="https://wa.me/6285770799461" target="_blank" class="block hover:text-green-500 transition"><i class="fab fa-whatsapp mr-2"></i> 0857-7079-9461</a>
+                    <p><i class="fas fa-envelope mr-2"></i> seaporiatidungid@gmail.com</p>
+                    <p><i class="fas fa-map-marker-alt mr-2 text-red-400"></i> Pulau Tidung, Kepulauan Seribu</p>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-extrabold text-sm uppercase tracking-widest mb-6">Social Media</h4>
+                <div class="flex justify-center md:justify-start gap-4">
+                    <a href="https://instagram.com/seaporia.id" target="_blank" class="w-12 h-12 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-xl text-pink-600 shadow-sm hover:scale-110 transition">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://tiktok.com/@seaporia.id" target="_blank" class="w-12 h-12 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-xl text-black shadow-sm hover:scale-110 transition">
+                        <i class="fab fa-tiktok"></i>
+                    </a>
+                    <a href="https://wa.me/6285770799461" target="_blank" class="w-12 h-12 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-xl text-green-600 shadow-sm hover:scale-110 transition">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>
+                <p class="mt-6 text-slate-400 text-xs italic">Update info promo harian di Instagram Story kami.</p>
+            </div>
+        </div>
+        <div class="mt-20 pt-8 border-t border-slate-100 text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+            &copy; 2026 Seaporia.id Official Management. All Rights Reserved.
+        </div>
+    </footer>
+
+    <script>
+        function seaporiaApp() {
+            return {
+                tab: '2d1n',
+                gallery: [],
+                order: { nama: '', pax: 2, price: '400000' },
+                pricing: {
+                    '2d1n': [ {name: 'Hemat (11+)', price: 400000}, {name: 'Standar (5-10)', price: 450000}, {name: 'Privat (2-4)', price: 950000} ],
+                    '3d2n': [ {name: 'Hemat (11+)', price: 680000}, {name: 'Standar (5-10)', price: 880000}, {name: 'Privat (2-4)', price: 1350000} ]
+                },
+
+                initData() {
+                    const saved = localStorage.getItem('seaporia_final_v6');
+                    this.gallery = saved ? JSON.parse(saved) : [
+                        'https://images.unsplash.com/photo-1544918877-46431f3910ca?q=80&w=800',
+                        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800',
+                        'https://images.unsplash.com/photo-1510009489794-352fba39fab0?q=80&w=800'
+                    ];
+                },
+
+                autoFill(p) {
+                    this.order.price = p.toString();
+                    document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+                },
+
+                uploadImg(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            this.gallery.unshift(event.target.result);
+                            localStorage.setItem('seaporia_final_v6', JSON.stringify(this.gallery));
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+
+                delImg(i) {
+                    if(confirm('Hapus foto?')) {
+                        this.gallery.splice(i, 1);
+                        localStorage.setItem('seaporia_final_v6', JSON.stringify(this.gallery));
+                    }
+                },
+
+                submitOrder() {
+                    const total = this.order.pax * this.order.price;
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    doc.setFontSize(22);
+                    doc.text("INVOICE SEAPORIA.ID", 105, 20, { align: 'center' });
+                    doc.setFontSize(12);
+                    doc.text(`Nama: ${this.order.nama}`, 20, 50);
+                    doc.text(`Peserta: ${this.order.pax} Orang`, 20, 60);
+                    doc.text(`Total: Rp ${total.toLocaleString('id-ID')}`, 20, 70);
+                    doc.save(`Seaporia_${this.order.nama}.pdf`);
+
+                    const msg = `Halo Seaporia! Saya ${this.order.nama} ingin booking untuk ${this.order.pax} orang. Total estimasi Rp ${total.toLocaleString('id-ID')}.`;
+                    window.open(`https://wa.me/6285770799461?text=${encodeURIComponent(msg)}`, '_blank');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
